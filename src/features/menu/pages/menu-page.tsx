@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import type { RestaurantMenu } from "../types/menu";
 import { useParams } from "react-router-dom";
+import type { RestaurantMenu } from "../types/menu";
 import { getMenu } from "../api/get-menu";
+import MenuItemCard from "@/components/menu-item-card";
 
 export default function MenuPage() {
   const { slug } = useParams();
@@ -25,28 +26,23 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div className="p-6 max-w-2xl mx-auto space-y-8">
       <h1 className="text-2xl font-bold">{data.name}</h1>
 
       {data.categories.map((category) => (
         <div key={category.id} className="space-y-3">
-          <h2 className="text-xl font-semibold">{category.name}</h2>
+          <h2 className="text-lg font-semibold border-b pb-1">
+            {category.name}
+          </h2>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {category.menuItems.map((item) => (
-              <div
+              <MenuItemCard
                 key={item.id}
-                className="border rounded-lg p-3 flex justify-between"
-              >
-                <div>
-                  <p className="font-medium">{item.name}</p>
-                  {item.description && (
-                    <p className="text-sm text-gray-500">{item.description}</p>
-                  )}
-                </div>
-
-                <div className="font-semibold">K{item.price}</div>
-              </div>
+                name={item.name}
+                description={item.description}
+                price={item.price}
+              />
             ))}
           </div>
         </div>
