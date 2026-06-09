@@ -6,7 +6,7 @@ import MenuItemCard from "@/features/menu/components/menu-item-card";
 import { useCart } from "@/features/cart/context/context-cart";
 
 export default function MenuPage() {
-  const { items, total } = useCart();
+  const { total, totalItems } = useCart();
   const { slug } = useParams();
   const [data, setData] = useState<RestaurantMenu | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function MenuPage() {
       ))}
 
       <div className="fixed bottom-4 right-4 bg-black text-white p-3 rounded">
-        Items: {items.length} | Total: K{total}
+        Items: {totalItems} | Total: K{total}
       </div>
     </div>
   );

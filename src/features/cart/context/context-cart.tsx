@@ -4,6 +4,7 @@ import type { CartItem } from "../types/cart";
 type CartContextType = {
   items: CartItem[];
   total: number;
+  totalItems: number;
   addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
@@ -34,6 +35,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => setItems([]);
 
+  const totalItems = useMemo(() => {
+    return items.reduce((sum, item) => sum + item.quantity, 0);
+  }, [items]);
+
   const total = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [items]);
@@ -44,6 +49,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     addItem,
     removeItem,
     clearCart,
+    totalItems,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
