@@ -4,12 +4,47 @@ import type { RestaurantMenu } from "../types/menu";
 import { getMenu } from "../api/get-menu";
 import MenuItemCard from "@/features/menu/components/menu-item-card";
 import { useCart } from "@/features/cart/context/context-cart";
+import { loadLencoScript } from "@/features/payments/lenco";
 
 export default function MenuPage() {
-  const { total, totalItems } = useCart();
   const { slug } = useParams();
   const [data, setData] = useState<RestaurantMenu | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { items, total, clearCart, totalItems } = useCart();
+
+  const handleCheckout = async () => {
+    if (items.length === 0) return;
+
+    await loadLencoScript();
+
+    const reference = `order_${Date.now()}`;
+
+    window.LencoPay.getPaid({
+      key: import.meta.env.VITE_LENCO_PUBLIC_KEY,
+      reference,
+      email: "customer@demo.com",
+      amount: total,
+      currency: "ZMW",
+      channels: ["card", "mobile-money"],
+
+      customer: {
+        firstName: "Guest",
+        lastName: "User",
+        phone: "0970000000",
+      },
+
+      onSuccess: function (response: any) {
+        alert("Payment successful: " + response.reference);
+
+        clearCart();
+      },
+
+      onClose: function () {
+        console.log("Payment closed");
+      },
+    });
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -54,6 +89,21 @@ export default function MenuPage() {
       <div className="fixed bottom-4 right-4 bg-black text-white p-3 rounded">
         Items: {totalItems} | Total: K{total}
       </div>
+
+      {totalItems > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-black text-white p-3 rounded flex justify-between items-center">
+          <div className="text-sm">
+            {totalItems} items | K{total}
+          </div>
+
+          <button
+            onClick={handleCheckout}
+            className="bg-white text-black px-3 py-1 rounded text-sm"
+          >
+            Checkout
+          </button>
+        </div>
+      )}
     </div>
   );
 }
