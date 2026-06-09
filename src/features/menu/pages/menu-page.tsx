@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { RestaurantMenu } from "../types/menu";
 import { getMenu } from "../api/get-menu";
-import MenuItemCard from "@/components/menu-item-card";
+import MenuItemCard from "@/features/menu/components/menu-item-card";
+import { useCart } from "@/features/cart/context/context-cart";
 
 export default function MenuPage() {
+  const { items, total } = useCart();
   const { slug } = useParams();
   const [data, setData] = useState<RestaurantMenu | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,7 @@ export default function MenuPage() {
           <div className="space-y-3">
             {category.menuItems.map((item) => (
               <MenuItemCard
+                id={item.id}
                 key={item.id}
                 name={item.name}
                 description={item.description}
@@ -47,6 +50,10 @@ export default function MenuPage() {
           </div>
         </div>
       ))}
+
+      <div className="fixed bottom-4 right-4 bg-black text-white p-3 rounded">
+        Items: {items.length} | Total: K{total}
+      </div>
     </div>
   );
 }
