@@ -24,7 +24,13 @@ export default function AdminLoginPage() {
         password,
       });
 
-      localStorage.setItem("admin_session", JSON.stringify(result.admin));
+      localStorage.setItem(
+        "admin_session",
+        JSON.stringify({
+          admin: result.admin,
+          token: result.token,
+        }),
+      );
 
       navigate("/admin");
     } catch (err: any) {
