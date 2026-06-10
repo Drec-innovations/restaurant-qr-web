@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { adminLogin } from "../api/admin-login";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { saveAdminSession } from "@/features/auth/utils/admin-session";
+import { toast } from "sonner";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -30,9 +31,14 @@ export default function AdminLoginPage() {
         token: result.token,
       });
 
+      toast.success("Login successful");
+
       navigate("/admin");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      const message = err.message || "Login failed";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
