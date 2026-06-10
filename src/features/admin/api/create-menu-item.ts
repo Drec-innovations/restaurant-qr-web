@@ -4,6 +4,7 @@ type CreateMenuItemPayload = {
   name: string;
   description?: string;
   price: number;
+  imageUrl?: string;
 };
 
 const API_URL = import.meta.env.VITE_API_URL;

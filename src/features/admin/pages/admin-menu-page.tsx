@@ -19,6 +19,7 @@ export default function AdminMenuPage() {
   const [itemName, setItemName] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState("");
+  const [itemImageUrl, setItemImageUrl] = useState("");
 
   async function loadMenu() {
     setLoading(true);
@@ -83,6 +84,7 @@ export default function AdminMenuPage() {
         name: itemName.trim(),
         description: itemDescription.trim() || undefined,
         price: Number(itemPrice),
+        imageUrl: itemImageUrl.trim() || undefined,
       });
 
       toast.success("Menu item added successfully");
@@ -90,6 +92,7 @@ export default function AdminMenuPage() {
       setItemName("");
       setItemDescription("");
       setItemPrice("");
+      setItemImageUrl("");
 
       await loadMenu();
     } catch (error) {
@@ -203,6 +206,13 @@ export default function AdminMenuPage() {
                 type="number"
                 min="0"
                 step="0.01"
+                className="w-full border rounded px-3 py-2 text-sm"
+              />
+
+              <input
+                value={itemImageUrl}
+                onChange={(e) => setItemImageUrl(e.target.value)}
+                placeholder="Image URL"
                 className="w-full border rounded px-3 py-2 text-sm"
               />
 

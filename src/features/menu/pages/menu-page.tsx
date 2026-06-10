@@ -196,6 +196,7 @@ export default function MenuPage() {
                   name={item.name}
                   description={item.description}
                   price={item.price}
+                  imageUrl={item.imageUrl}
                 />
               ))}
             </div>
