@@ -50,6 +50,41 @@ export default function RestaurantOrdersPage() {
     }
   }
 
+  function getStatusBadge(status: string) {
+    switch (status) {
+      case "PAID":
+        return {
+          label: "New Order",
+          className: "bg-blue-100 text-blue-700 border-blue-200",
+        };
+      case "PREPARING":
+        return {
+          label: "Preparing",
+          className: "bg-yellow-100 text-yellow-700 border-yellow-200",
+        };
+      case "READY":
+        return {
+          label: "Ready",
+          className: "bg-green-100 text-green-700 border-green-200",
+        };
+      case "COMPLETED":
+        return {
+          label: "Completed",
+          className: "bg-zinc-100 text-zinc-700 border-zinc-200",
+        };
+      case "FAILED":
+        return {
+          label: "Failed",
+          className: "bg-red-100 text-red-700 border-red-200",
+        };
+      default:
+        return {
+          label: status,
+          className: "bg-muted text-muted-foreground border-border",
+        };
+    }
+  }
+
   async function handleStatusChange(orderId: string, status: string) {
     try {
       const result = await updateOrderStatus(orderId, status);
@@ -155,9 +190,15 @@ export default function RestaurantOrdersPage() {
               <span>Order #{order.id.slice(-6)}</span>
               <span>K{order.total}</span>
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {order.status} • {new Date(order.createdAt).toLocaleString()}
-            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span
+                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusBadge(order.status).className}`}
+              >
+                {getStatusBadge(order.status).label}
+              </span>
+
+              <span>{new Date(order.createdAt).toLocaleString()}</span>
+            </div>
 
             <div className="text-sm space-y-1 pt-2">
               {order.customerName && (
