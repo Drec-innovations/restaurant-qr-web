@@ -6,6 +6,7 @@ import { createMenuItem } from "../api/create-menu-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateMenuItemAvailability } from "../api/update-menu-item-availability";
 import { toast } from "sonner";
+import { uploadMenuItemImage } from "../api/upload-menu-item-image";
 
 const restaurantSlug = import.meta.env.VITE_RESTAURANT_SLUG;
 
@@ -20,6 +21,8 @@ export default function AdminMenuPage() {
   const [itemDescription, setItemDescription] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemImageUrl, setItemImageUrl] = useState("");
+  const [itemImageFile, setItemImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   async function loadMenu() {
     setLoading(true);
@@ -80,11 +83,19 @@ export default function AdminMenuPage() {
     }
 
     try {
+      let uploadedImageUrl = itemImageUrl.trim() || undefined;
+
+      if (itemImageFile) {
+        setUploadingImage(true);
+        uploadedImageUrl = await uploadMenuItemImage(itemImageFile);
+        setUploadingImage(false);
+      }
+
       await createMenuItem(selectedCategoryId, {
         name: itemName.trim(),
         description: itemDescription.trim() || undefined,
         price: Number(itemPrice),
-        imageUrl: itemImageUrl.trim() || undefined,
+        imageUrl: uploadedImageUrl,
       });
 
       toast.success("Menu item added successfully");
@@ -93,10 +104,14 @@ export default function AdminMenuPage() {
       setItemDescription("");
       setItemPrice("");
       setItemImageUrl("");
+      setItemImageUrl("");
+      setItemImageFile(null);
 
       await loadMenu();
     } catch (error) {
       toast.error("Failed to add menu item");
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -209,18 +224,34 @@ export default function AdminMenuPage() {
                 className="w-full border rounded px-3 py-2 text-sm"
               />
 
-              <input
-                value={itemImageUrl}
-                onChange={(e) => setItemImageUrl(e.target.value)}
-                placeholder="Image URL"
-                className="w-full border rounded px-3 py-2 text-sm"
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Item image</label>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setItemImageFile(file);
+                  }}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
+
+                {itemImageUrl && (
+                  <img
+                    src={itemImageUrl}
+                    alt="Uploaded menu item"
+                    className="h-24 w-24 rounded object-cover"
+                  />
+                )}
+              </div>
 
               <button
                 type="submit"
-                className="w-full bg-black text-white rounded py-2 text-sm"
+                disabled={uploadingImage}
+                className="w-full bg-black text-white rounded px-3 py-2 text-sm disabled:opacity-60"
               >
-                Add Item
+                {uploadingImage ? "Uploading image..." : "Add menu item"}
               </button>
             </form>
           </CardContent>
