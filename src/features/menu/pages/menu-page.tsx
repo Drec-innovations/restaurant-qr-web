@@ -37,18 +37,30 @@ export default function MenuPage() {
       onSuccess: async function (response: any) {
         const reference = response.reference;
 
-        const res = await fetch(
-          `http://localhost:3500/api/payments/verify/${reference}`,
-        );
+        console.log("reference::", reference);
 
-        const data = await res.json();
+        const res = await fetch("http://localhost:3500/api/orders/confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reference,
+            restaurantId: data?.id,
+            items,
+          }),
+        });
 
-        if (data.success && data.status === "successful") {
-          alert("Payment verified by server ✔");
+        const result = await res.json();
+
+        if (result.success) {
+          alert("Order confirmed ✔");
+          console.log("ORDER:", result.order);
+
           clearCart();
         } else {
-          alert("Payment not verified yet ❌");
-          console.log(data);
+          alert("Order could not be confirmed ❌");
+          console.log(result);
         }
       },
 
