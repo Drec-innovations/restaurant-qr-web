@@ -31,13 +31,25 @@ export default function MenuPage() {
       customer: {
         firstName: "Guest",
         lastName: "User",
-        phone: "0970000000",
+        phone: "0971111111",
       },
 
-      onSuccess: function (response: any) {
-        alert("Payment successful: " + response.reference);
+      onSuccess: async function (response: any) {
+        const reference = response.reference;
 
-        clearCart();
+        const res = await fetch(
+          `http://localhost:3500/api/payments/verify/${reference}`,
+        );
+
+        const data = await res.json();
+
+        if (data.success && data.status === "successful") {
+          alert("Payment verified by server ✔");
+          clearCart();
+        } else {
+          alert("Payment not verified yet ❌");
+          console.log(data);
+        }
       },
 
       onClose: function () {
