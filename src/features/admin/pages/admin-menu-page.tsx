@@ -5,6 +5,7 @@ import { createCategory } from "../api/create-category";
 import { createMenuItem } from "../api/create-menu-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateMenuItemAvailability } from "../api/update-menu-item-availability";
+import { toast } from "sonner";
 
 const restaurantSlug = import.meta.env.VITE_RESTAURANT_SLUG;
 
@@ -37,41 +38,80 @@ export default function AdminMenuPage() {
   async function handleCreateCategory(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!menu?.id) return;
-    if (!categoryName.trim()) return;
+    if (!menu?.id) {
+      toast.error("Restaurant menu was not found");
+      return;
+    }
 
-    await createCategory(menu.id, categoryName.trim());
+    if (!categoryName.trim()) {
+      toast.error("Category name is required");
+      return;
+    }
 
-    setCategoryName("");
-    await loadMenu();
+    try {
+      await createCategory(menu.id, categoryName.trim());
+
+      toast.success("Category added successfully");
+
+      setCategoryName("");
+      await loadMenu();
+    } catch (error) {
+      toast.error("Failed to add category");
+    }
   }
 
   async function handleCreateMenuItem(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!selectedCategoryId) return;
-    if (!itemName.trim()) return;
-    if (!itemPrice.trim()) return;
+    if (!selectedCategoryId) {
+      toast.error("Please select a category");
+      return;
+    }
 
-    await createMenuItem(selectedCategoryId, {
-      name: itemName.trim(),
-      description: itemDescription.trim() || undefined,
-      price: Number(itemPrice),
-    });
+    if (!itemName.trim()) {
+      toast.error("Item name is required");
+      return;
+    }
 
-    setItemName("");
-    setItemDescription("");
-    setItemPrice("");
+    if (!itemPrice.trim() || Number(itemPrice) <= 0) {
+      toast.error("Enter a valid item price");
+      return;
+    }
 
-    await loadMenu();
+    try {
+      await createMenuItem(selectedCategoryId, {
+        name: itemName.trim(),
+        description: itemDescription.trim() || undefined,
+        price: Number(itemPrice),
+      });
+
+      toast.success("Menu item added successfully");
+
+      setItemName("");
+      setItemDescription("");
+      setItemPrice("");
+
+      await loadMenu();
+    } catch (error) {
+      toast.error("Failed to add menu item");
+    }
   }
 
   async function handleAvailabilityToggle(
     itemId: string,
     currentValue: boolean,
   ) {
-    await updateMenuItemAvailability(itemId, !currentValue);
-    await loadMenu();
+    try {
+      await updateMenuItemAvailability(itemId, !currentValue);
+
+      toast.success(
+        currentValue ? "Item marked as sold out" : "Item marked as available",
+      );
+
+      await loadMenu();
+    } catch (error) {
+      toast.error("Failed to update item availability");
+    }
   }
 
   useEffect(() => {
