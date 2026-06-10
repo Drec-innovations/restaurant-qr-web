@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { getRestaurantOrders } from "../api/get-restaurant-orders";
 import { updateOrderStatus } from "../api/update-order-status";
+import { toast } from "sonner";
 
 type OrderItem = {
   id: string;
@@ -33,13 +34,35 @@ export default function RestaurantOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  async function handleStatusChange(orderId: string, status: string) {
-    const result = await updateOrderStatus(orderId, status);
+  function getStatusMessage(status: string) {
+    switch (status) {
+      case "PREPARING":
+        return "Order marked as preparing";
+      case "READY":
+        return "Order marked as ready";
+      case "COMPLETED":
+        return "Order marked as completed";
+      default:
+        return "Order status updated";
+    }
+  }
 
-    if (result.success) {
-      setOrders((prev) =>
-        prev.map((order) => (order.id === orderId ? result.order : order)),
-      );
+  async function handleStatusChange(orderId: string, status: string) {
+    try {
+      const result = await updateOrderStatus(orderId, status);
+
+      if (result.success) {
+        setOrders((prev) =>
+          prev.map((order) => (order.id === orderId ? result.order : order)),
+        );
+
+        toast.success(getStatusMessage(status));
+        return;
+      }
+
+      toast.error("Failed to update order status");
+    } catch (error) {
+      toast.error("Failed to update order status");
     }
   }
 
