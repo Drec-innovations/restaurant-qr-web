@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -33,6 +33,9 @@ const restaurantId = import.meta.env.VITE_RESTAURANT_ID;
 export default function RestaurantOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newOrderIds, setNewOrderIds] = useState<string[]>([]);
+  const knownOrderIdsRef = useRef<Set<string>>(new Set());
+  const hasInitialLoadRef = useRef(false);
 
   function getStatusMessage(status: string) {
     switch (status) {
@@ -69,7 +72,41 @@ export default function RestaurantOrdersPage() {
   async function loadOrders() {
     try {
       const data = await getRestaurantOrders(restaurantId);
-      setOrders(data.orders);
+      const latestOrders: Order[] = data.orders;
+
+      const latestOrderIds = latestOrders.map((order) => order.id);
+
+      if (!hasInitialLoadRef.current) {
+        knownOrderIdsRef.current = new Set(latestOrderIds);
+        hasInitialLoadRef.current = true;
+        setOrders(latestOrders);
+        return;
+      }
+
+      const incomingOrders = latestOrders.filter(
+        (order) => !knownOrderIdsRef.current.has(order.id),
+      );
+
+      if (incomingOrders.length > 0) {
+        const incomingOrderIds = incomingOrders.map((order) => order.id);
+
+        setNewOrderIds((prev) => [...prev, ...incomingOrderIds]);
+
+        toast.success(
+          incomingOrders.length === 1
+            ? "New order received"
+            : `${incomingOrders.length} new orders received`,
+        );
+
+        window.setTimeout(() => {
+          setNewOrderIds((prev) =>
+            prev.filter((id) => !incomingOrderIds.includes(id)),
+          );
+        }, 8000);
+      }
+
+      knownOrderIdsRef.current = new Set(latestOrderIds);
+      setOrders(latestOrders);
     } catch (error) {
       toast.error("Failed to load orders");
     } finally {
@@ -105,7 +142,14 @@ export default function RestaurantOrdersPage() {
       )}
 
       {orders.map((order) => (
-        <Card key={order.id}>
+        <Card
+          key={order.id}
+          className={
+            newOrderIds.includes(order.id)
+              ? "border-green-500 bg-green-50"
+              : undefined
+          }
+        >
           <CardHeader>
             <CardTitle className="flex justify-between text-base">
               <span>Order #{order.id.slice(-6)}</span>
