@@ -85,6 +85,28 @@ export default function RestaurantOrdersPage() {
     }
   }
 
+  function getNextOrderAction(status: string) {
+    switch (status) {
+      case "PAID":
+        return {
+          label: "Start preparing",
+          nextStatus: "PREPARING",
+        };
+      case "PREPARING":
+        return {
+          label: "Mark ready",
+          nextStatus: "READY",
+        };
+      case "READY":
+        return {
+          label: "Complete order",
+          nextStatus: "COMPLETED",
+        };
+      default:
+        return null;
+    }
+  }
+
   async function handleStatusChange(orderId: string, status: string) {
     try {
       const result = await updateOrderStatus(orderId, status);
@@ -176,93 +198,94 @@ export default function RestaurantOrdersPage() {
         <p className="text-muted-foreground">No orders yet.</p>
       )}
 
-      {orders.map((order) => (
-        <Card
-          key={order.id}
-          className={
-            newOrderIds.includes(order.id)
-              ? "border-green-500 bg-green-50"
-              : undefined
-          }
-        >
-          <CardHeader>
-            <CardTitle className="flex justify-between text-base">
-              <span>Order #{order.id.slice(-6)}</span>
-              <span>K{order.total}</span>
-            </CardTitle>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span
-                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getStatusBadge(order.status).className}`}
-              >
-                {getStatusBadge(order.status).label}
-              </span>
+      {orders.map((order) => {
+        const nextAction = getNextOrderAction(order.status);
+        const statusBadge = getStatusBadge(order.status);
 
-              <span>{new Date(order.createdAt).toLocaleString()}</span>
-            </div>
+        return (
+          <Card
+            key={order.id}
+            className={
+              newOrderIds.includes(order.id)
+                ? "border-green-500 bg-green-50"
+                : undefined
+            }
+          >
+            <CardHeader>
+              <CardTitle className="flex justify-between text-base">
+                <span>Order #{order.id.slice(-6)}</span>
+                <span>K{order.total}</span>
+              </CardTitle>
 
-            <div className="text-sm space-y-1 pt-2">
-              {order.customerName && (
-                <p>
-                  <span className="font-medium">Customer:</span>{" "}
-                  {order.customerName}
-                </p>
-              )}
-
-              {order.customerPhone && (
-                <p>
-                  <span className="font-medium">Phone:</span>{" "}
-                  {order.customerPhone}
-                </p>
-              )}
-
-              {order.customerEmail && (
-                <p>
-                  <span className="font-medium">Email:</span>{" "}
-                  {order.customerEmail}
-                </p>
-              )}
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-2">
-            {order.items.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between text-sm border-b pb-2"
-              >
-                <span>
-                  {item.name} × {item.quantity}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span
+                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusBadge.className}`}
+                >
+                  {statusBadge.label}
                 </span>
-                <span>K{item.price * item.quantity}</span>
+
+                <span>{new Date(order.createdAt).toLocaleString()}</span>
               </div>
-            ))}
-          </CardContent>
-          <CardFooter>
-            <div className="flex gap-2 pt-3">
-              <button
-                onClick={() => handleStatusChange(order.id, "PREPARING")}
-                className="text-xs border rounded px-2 py-1"
-              >
-                Preparing
-              </button>
 
-              <button
-                onClick={() => handleStatusChange(order.id, "READY")}
-                className="text-xs border rounded px-2 py-1"
-              >
-                Ready
-              </button>
+              <div className="text-sm space-y-1 pt-2">
+                {order.customerName && (
+                  <p>
+                    <span className="font-medium">Customer:</span>{" "}
+                    {order.customerName}
+                  </p>
+                )}
 
-              <button
-                onClick={() => handleStatusChange(order.id, "COMPLETED")}
-                className="text-xs border rounded px-2 py-1"
-              >
-                Completed
-              </button>
-            </div>
-          </CardFooter>
-        </Card>
-      ))}
+                {order.customerPhone && (
+                  <p>
+                    <span className="font-medium">Phone:</span>{" "}
+                    {order.customerPhone}
+                  </p>
+                )}
+
+                {order.customerEmail && (
+                  <p>
+                    <span className="font-medium">Email:</span>{" "}
+                    {order.customerEmail}
+                  </p>
+                )}
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-2">
+              {order.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between text-sm border-b pb-2"
+                >
+                  <span>
+                    {item.name} × {item.quantity}
+                  </span>
+                  <span>K{item.price * item.quantity}</span>
+                </div>
+              ))}
+            </CardContent>
+
+            <CardFooter>
+              {nextAction ? (
+                <div className="flex gap-2 pt-3">
+                  <button
+                    onClick={() =>
+                      handleStatusChange(order.id, nextAction.nextStatus)
+                    }
+                    className="text-xs border rounded px-3 py-2 bg-black text-white"
+                  >
+                    {nextAction.label}
+                  </button>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground pt-3">
+                  No further action needed
+                </p>
+              )}
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 }
