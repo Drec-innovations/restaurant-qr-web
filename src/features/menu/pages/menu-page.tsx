@@ -5,11 +5,13 @@ import { getMenu } from "../api/get-menu";
 import MenuItemCard from "@/features/menu/components/menu-item-card";
 import { useCart } from "@/features/cart/context/context-cart";
 import { loadLencoScript } from "@/features/payments/lenco";
+import { useNavigate } from "react-router-dom";
 
 export default function MenuPage() {
   const { slug } = useParams();
   const [data, setData] = useState<RestaurantMenu | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const { items, total, clearCart, totalItems } = useCart();
 
@@ -54,10 +56,13 @@ export default function MenuPage() {
         const result = await res.json();
 
         if (result.success) {
-          alert("Order confirmed ✔");
-          console.log("ORDER:", result.order);
-
           clearCart();
+
+          navigate("/order-success", {
+            state: {
+              order: result.order,
+            },
+          });
         } else {
           alert("Order could not be confirmed ❌");
           console.log(result);
