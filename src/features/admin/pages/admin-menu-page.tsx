@@ -4,6 +4,7 @@ import type { RestaurantMenu } from "@/features/menu/types/menu";
 import { createCategory } from "../api/create-category";
 import { createMenuItem } from "../api/create-menu-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { updateMenuItemAvailability } from "../api/update-menu-item-availability";
 
 export default function AdminMenuPage() {
   const restaurantSlug = "demo-restaurant";
@@ -62,6 +63,14 @@ export default function AdminMenuPage() {
     setItemDescription("");
     setItemPrice("");
 
+    await loadMenu();
+  }
+
+  async function handleAvailabilityToggle(
+    itemId: string,
+    currentValue: boolean,
+  ) {
+    await updateMenuItemAvailability(itemId, !currentValue);
     await loadMenu();
   }
 
@@ -202,9 +211,14 @@ export default function AdminMenuPage() {
                       </p>
                     )}
 
-                    <p className="text-xs text-muted-foreground">
-                      {item.isAvailable ? "Available" : "Unavailable"}
-                    </p>
+                    <button
+                      onClick={() =>
+                        handleAvailabilityToggle(item.id, item.isAvailable)
+                      }
+                      className="text-xs underline text-muted-foreground"
+                    >
+                      {item.isAvailable ? "Mark sold out" : "Mark available"}
+                    </button>
                   </div>
 
                   <p className="font-semibold">K{item.price}</p>
