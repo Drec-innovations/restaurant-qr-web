@@ -2,6 +2,10 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 
 const navItems = [
   {
+    label: "Dashboard",
+    href: "/admin",
+  },
+  {
     label: "Menu",
     href: "/admin/menu",
   },

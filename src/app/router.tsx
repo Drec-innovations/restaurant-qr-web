@@ -5,6 +5,7 @@ import RestaurantOrdersPage from "@/features/orders/pages/restaurant-orders-page
 import RestaurantQrPage from "@/features/admin/pages/restaurant-qr-page";
 import AdminMenuPage from "@/features/admin/pages/admin-menu-page";
 import AdminLayout from "@/features/admin/layouts/admin-layout";
+import AdminDashboardPage from "@/features/admin/pages/admin-dashboard-page";
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ export const router = createBrowserRouter([
     path: "/admin",
     element: <AdminLayout />,
     children: [
+      {
+        index: true,
+        element: <AdminDashboardPage />,
+      },
       {
         path: "menu",
         element: <AdminMenuPage />,
