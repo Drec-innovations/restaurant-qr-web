@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminLogin } from "../api/admin-login";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { saveAdminSession } from "@/features/auth/utils/admin-session";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -24,13 +25,10 @@ export default function AdminLoginPage() {
         password,
       });
 
-      localStorage.setItem(
-        "admin_session",
-        JSON.stringify({
-          admin: result.admin,
-          token: result.token,
-        }),
-      );
+      saveAdminSession({
+        admin: result.admin,
+        token: result.token,
+      });
 
       navigate("/admin");
     } catch (err: any) {

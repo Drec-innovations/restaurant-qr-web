@@ -1,4 +1,4 @@
-import { getAdminToken } from "@/features/auth/utils/get-admin-token";
+import { getAdminToken } from "@/features/auth/utils/admin-session";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

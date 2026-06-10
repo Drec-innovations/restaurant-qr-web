@@ -1,9 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
+import { isAdminLoggedIn } from "../utils/admin-session";
 
 export default function PublicAdminRoute() {
-  const session = localStorage.getItem("admin_session");
-
-  if (session) {
+  if (isAdminLoggedIn()) {
     return <Navigate to="/admin" replace />;
   }
 

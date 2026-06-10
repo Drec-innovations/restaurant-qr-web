@@ -1,3 +1,4 @@
+import { clearAdminSession } from "@/features/auth/utils/admin-session";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
@@ -25,7 +26,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   function handleLogout() {
-    localStorage.removeItem("admin_session");
+    clearAdminSession();
     navigate("/admin/login", { replace: true });
   }
 
