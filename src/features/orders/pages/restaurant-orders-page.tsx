@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { getRestaurantOrders } from "../api/get-restaurant-orders";
+import { updateOrderStatus } from "../api/update-order-status";
 
 type OrderItem = {
   id: string;
@@ -22,6 +29,16 @@ export default function RestaurantOrdersPage() {
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+
+  async function handleStatusChange(orderId: string, status: string) {
+    const result = await updateOrderStatus(orderId, status);
+
+    if (result.success) {
+      setOrders((prev) =>
+        prev.map((order) => (order.id === orderId ? result.order : order)),
+      );
+    }
+  }
 
   useEffect(() => {
     getRestaurantOrders(restaurantId)
@@ -66,6 +83,30 @@ export default function RestaurantOrdersPage() {
               </div>
             ))}
           </CardContent>
+          <CardFooter>
+            <div className="flex gap-2 pt-3">
+              <button
+                onClick={() => handleStatusChange(order.id, "PREPARING")}
+                className="text-xs border rounded px-2 py-1"
+              >
+                Preparing
+              </button>
+
+              <button
+                onClick={() => handleStatusChange(order.id, "READY")}
+                className="text-xs border rounded px-2 py-1"
+              >
+                Ready
+              </button>
+
+              <button
+                onClick={() => handleStatusChange(order.id, "COMPLETED")}
+                className="text-xs border rounded px-2 py-1"
+              >
+                Completed
+              </button>
+            </div>
+          </CardFooter>
         </Card>
       ))}
     </div>
