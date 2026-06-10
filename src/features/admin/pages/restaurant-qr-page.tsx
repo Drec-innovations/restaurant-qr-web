@@ -1,8 +1,9 @@
 import { QRCodeCanvas } from "qrcode.react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const restaurantSlug = import.meta.env.VITE_RESTAURANT_SLUG;
+
 export default function RestaurantQrPage() {
-  const restaurantSlug = "demo-restaurant";
   const menuUrl = `${window.location.origin}/menu/${restaurantSlug}`;
 
   return (

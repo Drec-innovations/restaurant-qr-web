@@ -6,6 +6,8 @@ import MenuItemCard from "@/features/menu/components/menu-item-card";
 import { useCart } from "@/features/cart/context/context-cart";
 import { loadLencoScript } from "@/features/payments/lenco";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type CustomerDetails = {
   fullName: string;
   phone: string;
@@ -94,7 +96,7 @@ export default function MenuPage() {
 
         console.log("reference::", reference);
 
-        const res = await fetch("http://localhost:3500/api/orders/confirm", {
+        const res = await fetch(`${API_URL}/api/orders/confirm`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

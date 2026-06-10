@@ -6,9 +6,9 @@ import { createMenuItem } from "../api/create-menu-item";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateMenuItemAvailability } from "../api/update-menu-item-availability";
 
-export default function AdminMenuPage() {
-  const restaurantSlug = "demo-restaurant";
+const restaurantSlug = import.meta.env.VITE_RESTAURANT_SLUG;
 
+export default function AdminMenuPage() {
   const [menu, setMenu] = useState<RestaurantMenu | null>(null);
   const [loading, setLoading] = useState(true);
 

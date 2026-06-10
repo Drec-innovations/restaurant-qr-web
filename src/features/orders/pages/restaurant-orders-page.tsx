@@ -27,9 +27,9 @@ type Order = {
   items: OrderItem[];
 };
 
-export default function RestaurantOrdersPage() {
-  const restaurantId = "cmq6utt0c00002sv5zrlkf5y9";
+const restaurantId = import.meta.env.VITE_RESTAURANT_ID;
 
+export default function RestaurantOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 

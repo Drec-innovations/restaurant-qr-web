@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRestaurantOrders } from "@/features/orders/api/get-restaurant-orders";
 
+const restaurantId = import.meta.env.VITE_RESTAURANT_ID;
+
 type Order = {
   id: string;
   total: number;
@@ -10,8 +12,6 @@ type Order = {
 };
 
 export default function AdminDashboardPage() {
-  const restaurantId = "cmq6utt0c00002sv5zrlkf5y9";
-
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
