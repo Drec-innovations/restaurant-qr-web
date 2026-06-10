@@ -252,26 +252,38 @@ export default function AdminMenuPage() {
                   key={item.id}
                   className="flex justify-between gap-4 border-b pb-2 text-sm"
                 >
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-
-                    {item.description && (
-                      <p className="text-muted-foreground">
-                        {item.description}
-                      </p>
+                  <div className="flex gap-3">
+                    {item.imageUrl && (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="h-16 w-16 rounded object-cover"
+                      />
                     )}
 
-                    <button
-                      onClick={() =>
-                        handleAvailabilityToggle(item.id, item.isAvailable)
-                      }
-                      className="text-xs underline text-muted-foreground"
-                    >
-                      {item.isAvailable ? "Mark sold out" : "Mark available"}
-                    </button>
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+
+                      {item.description && (
+                        <p className="text-muted-foreground">
+                          {item.description}
+                        </p>
+                      )}
+
+                      <button
+                        onClick={() =>
+                          handleAvailabilityToggle(item.id, item.isAvailable)
+                        }
+                        className="text-xs underline text-muted-foreground"
+                      >
+                        {item.isAvailable ? "Mark sold out" : "Mark available"}
+                      </button>
+                    </div>
                   </div>
 
-                  <p className="font-semibold">K{item.price}</p>
+                  <p className="font-semibold whitespace-nowrap">
+                    K{item.price}
+                  </p>
                 </div>
               ))}
             </CardContent>
