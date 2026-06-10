@@ -21,6 +21,9 @@ type Order = {
   total: number;
   status: string;
   createdAt: string;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  customerEmail?: string | null;
   items: OrderItem[];
 };
 
@@ -68,6 +71,29 @@ export default function RestaurantOrdersPage() {
             <p className="text-sm text-muted-foreground">
               {order.status} • {new Date(order.createdAt).toLocaleString()}
             </p>
+
+            <div className="text-sm space-y-1 pt-2">
+              {order.customerName && (
+                <p>
+                  <span className="font-medium">Customer:</span>{" "}
+                  {order.customerName}
+                </p>
+              )}
+
+              {order.customerPhone && (
+                <p>
+                  <span className="font-medium">Phone:</span>{" "}
+                  {order.customerPhone}
+                </p>
+              )}
+
+              {order.customerEmail && (
+                <p>
+                  <span className="font-medium">Email:</span>{" "}
+                  {order.customerEmail}
+                </p>
+              )}
+            </div>
           </CardHeader>
 
           <CardContent className="space-y-2">
