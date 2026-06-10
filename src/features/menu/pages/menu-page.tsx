@@ -151,25 +151,31 @@ export default function MenuPage() {
     <div className="p-6 max-w-2xl mx-auto space-y-8 pb-40">
       <h1 className="text-2xl font-bold">{data.name}</h1>
 
-      {data.categories.map((category) => (
-        <div key={category.id} className="space-y-3">
-          <h2 className="text-lg font-semibold border-b pb-1">
-            {category.name}
-          </h2>
+      {data.categories
+        .map((category) => ({
+          ...category,
+          menuItems: category.menuItems.filter((item) => item.isAvailable),
+        }))
+        .filter((category) => category.menuItems.length > 0)
+        .map((category) => (
+          <div key={category.id} className="space-y-3">
+            <h2 className="text-lg font-semibold border-b pb-1">
+              {category.name}
+            </h2>
 
-          <div className="space-y-3">
-            {category.menuItems.map((item) => (
-              <MenuItemCard
-                id={item.id}
-                key={item.id}
-                name={item.name}
-                description={item.description}
-                price={item.price}
-              />
-            ))}
+            <div className="space-y-3">
+              {category.menuItems.map((item) => (
+                <MenuItemCard
+                  id={item.id}
+                  key={item.id}
+                  name={item.name}
+                  description={item.description}
+                  price={item.price}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
 
       {totalItems > 0 && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-black text-white p-4 rounded-xl space-y-3 shadow-lg">
