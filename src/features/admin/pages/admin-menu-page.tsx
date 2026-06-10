@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateMenuItemAvailability } from "../api/update-menu-item-availability";
 import { toast } from "sonner";
 import { uploadMenuItemImage } from "../api/upload-menu-item-image";
+import { updateMenuItem } from "../api/update-menu-item";
 
 const restaurantSlug = import.meta.env.VITE_RESTAURANT_SLUG;
 
@@ -23,6 +24,7 @@ export default function AdminMenuPage() {
   const [itemImageUrl, setItemImageUrl] = useState("");
   const [itemImageFile, setItemImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   async function loadMenu() {
     setLoading(true);
@@ -64,10 +66,36 @@ export default function AdminMenuPage() {
     }
   }
 
+  function handleEditItem(item: {
+    id: string;
+    name: string;
+    description?: string | null;
+    price: number;
+    imageUrl?: string | null;
+  }) {
+    setEditingItemId(item.id);
+    setItemName(item.name);
+    setItemDescription(item.description || "");
+    setItemPrice(String(item.price));
+    setItemImageUrl(item.imageUrl || "");
+    setItemImageFile(null);
+
+    toast.info("Editing menu item");
+  }
+
+  function resetItemForm() {
+    setEditingItemId(null);
+    setItemName("");
+    setItemDescription("");
+    setItemPrice("");
+    setItemImageUrl("");
+    setItemImageFile(null);
+  }
+
   async function handleCreateMenuItem(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!selectedCategoryId) {
+    if (!selectedCategoryId && !editingItemId) {
       toast.error("Please select a category");
       return;
     }
@@ -88,28 +116,36 @@ export default function AdminMenuPage() {
       if (itemImageFile) {
         setUploadingImage(true);
         uploadedImageUrl = await uploadMenuItemImage(itemImageFile);
-        setUploadingImage(false);
       }
 
-      await createMenuItem(selectedCategoryId, {
-        name: itemName.trim(),
-        description: itemDescription.trim() || undefined,
-        price: Number(itemPrice),
-        imageUrl: uploadedImageUrl,
-      });
+      if (editingItemId) {
+        await updateMenuItem(editingItemId, {
+          name: itemName.trim(),
+          description: itemDescription.trim() || undefined,
+          price: Number(itemPrice),
+          imageUrl: uploadedImageUrl,
+        });
 
-      toast.success("Menu item added successfully");
+        toast.success("Menu item updated successfully");
+      } else {
+        await createMenuItem(selectedCategoryId, {
+          name: itemName.trim(),
+          description: itemDescription.trim() || undefined,
+          price: Number(itemPrice),
+          imageUrl: uploadedImageUrl,
+        });
 
-      setItemName("");
-      setItemDescription("");
-      setItemPrice("");
-      setItemImageUrl("");
-      setItemImageUrl("");
-      setItemImageFile(null);
+        toast.success("Menu item added successfully");
+      }
 
+      resetItemForm();
       await loadMenu();
     } catch (error) {
-      toast.error("Failed to add menu item");
+      toast.error(
+        editingItemId
+          ? "Failed to update menu item"
+          : "Failed to add menu item",
+      );
     } finally {
       setUploadingImage(false);
     }
@@ -251,8 +287,21 @@ export default function AdminMenuPage() {
                 disabled={uploadingImage}
                 className="w-full bg-black text-white rounded px-3 py-2 text-sm disabled:opacity-60"
               >
-                {uploadingImage ? "Uploading image..." : "Add menu item"}
+                {uploadingImage
+                  ? "Uploading image..."
+                  : editingItemId
+                    ? "Update menu item"
+                    : "Add menu item"}
               </button>
+              {editingItemId && (
+                <button
+                  type="button"
+                  onClick={resetItemForm}
+                  className="w-full border rounded px-3 py-2 text-sm"
+                >
+                  Cancel edit
+                </button>
+              )}
             </form>
           </CardContent>
         </Card>
@@ -301,14 +350,25 @@ export default function AdminMenuPage() {
                         </p>
                       )}
 
-                      <button
-                        onClick={() =>
-                          handleAvailabilityToggle(item.id, item.isAvailable)
-                        }
-                        className="text-xs underline text-muted-foreground"
-                      >
-                        {item.isAvailable ? "Mark sold out" : "Mark available"}
-                      </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => handleEditItem(item)}
+                          className="text-xs underline text-muted-foreground"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            handleAvailabilityToggle(item.id, item.isAvailable)
+                          }
+                          className="text-xs underline text-muted-foreground"
+                        >
+                          {item.isAvailable
+                            ? "Mark sold out"
+                            : "Mark available"}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
