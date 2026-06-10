@@ -6,6 +6,9 @@ import RestaurantQrPage from "@/features/admin/pages/restaurant-qr-page";
 import AdminMenuPage from "@/features/admin/pages/admin-menu-page";
 import AdminLayout from "@/features/admin/layouts/admin-layout";
 import AdminDashboardPage from "@/features/admin/pages/admin-dashboard-page";
+import AdminLoginPage from "@/features/admin/pages/admin-login-page";
+import ProtectedAdminRoute from "@/features/auth/components/protected-admin-route";
+import PublicAdminRoute from "@/features/auth/components/public-admin-route";
 
 export const router = createBrowserRouter([
   {
@@ -17,24 +20,38 @@ export const router = createBrowserRouter([
     element: <OrderSuccessPage />,
   },
   {
-    path: "/admin",
-    element: <AdminLayout />,
+    element: <PublicAdminRoute />,
     children: [
       {
-        index: true,
-        element: <AdminDashboardPage />,
+        path: "/admin/login",
+        element: <AdminLoginPage />,
       },
+    ],
+  },
+  {
+    element: <ProtectedAdminRoute />,
+    children: [
       {
-        path: "menu",
-        element: <AdminMenuPage />,
-      },
-      {
-        path: "orders",
-        element: <RestaurantOrdersPage />,
-      },
-      {
-        path: "qr",
-        element: <RestaurantQrPage />,
+        path: "/admin",
+        element: <AdminLayout />,
+        children: [
+          {
+            index: true,
+            element: <AdminDashboardPage />,
+          },
+          {
+            path: "menu",
+            element: <AdminMenuPage />,
+          },
+          {
+            path: "orders",
+            element: <RestaurantOrdersPage />,
+          },
+          {
+            path: "qr",
+            element: <RestaurantQrPage />,
+          },
+        ],
       },
     ],
   },
