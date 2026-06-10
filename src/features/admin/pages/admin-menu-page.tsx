@@ -8,6 +8,7 @@ import { updateMenuItemAvailability } from "../api/update-menu-item-availability
 import { toast } from "sonner";
 import { uploadMenuItemImage } from "../api/upload-menu-item-image";
 import { updateMenuItem } from "../api/update-menu-item";
+import { deleteMenuItem } from "../api/delete-menu-item";
 
 const restaurantSlug = import.meta.env.VITE_RESTAURANT_SLUG;
 
@@ -165,6 +166,30 @@ export default function AdminMenuPage() {
       await loadMenu();
     } catch (error) {
       toast.error("Failed to update item availability");
+    }
+  }
+
+  async function handleDeleteMenuItem(itemId: string) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this menu item?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteMenuItem(itemId);
+
+      toast.success("Menu item deleted successfully");
+
+      if (editingItemId === itemId) {
+        resetItemForm();
+      }
+
+      await loadMenu();
+    } catch (error) {
+      toast.error("Failed to delete menu item");
     }
   }
 
@@ -350,7 +375,7 @@ export default function AdminMenuPage() {
                         </p>
                       )}
 
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-3">
                         <button
                           onClick={() => handleEditItem(item)}
                           className="text-xs underline text-muted-foreground"
@@ -367,6 +392,13 @@ export default function AdminMenuPage() {
                           {item.isAvailable
                             ? "Mark sold out"
                             : "Mark available"}
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteMenuItem(item.id)}
+                          className="text-xs underline text-red-600"
+                        >
+                          Delete
                         </button>
                       </div>
                     </div>
