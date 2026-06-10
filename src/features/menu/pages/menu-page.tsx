@@ -5,6 +5,7 @@ import { getMenu } from "../api/get-menu";
 import MenuItemCard from "@/features/menu/components/menu-item-card";
 import { useCart } from "@/features/cart/context/context-cart";
 import { loadLencoScript } from "@/features/payments/lenco";
+import { toast } from "sonner";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -54,23 +55,37 @@ export default function MenuPage() {
   };
 
   const handleCheckout = async () => {
-    if (items.length === 0) return;
+    if (items.length === 0) {
+      toast.error("Please add at least one item to your order");
+      return;
+    }
 
     if (!data?.id) {
-      alert("Restaurant not found");
+      toast.error("Restaurant menu was not found");
       return;
     }
 
-    if (
-      !customerDetails.fullName.trim() ||
-      !customerDetails.phone.trim() ||
-      !customerDetails.email.trim()
-    ) {
-      alert("Please enter your name, phone number, and email address.");
+    if (!customerDetails.fullName.trim()) {
+      toast.error("Please enter your full name");
       return;
     }
 
-    await loadLencoScript();
+    if (!customerDetails.phone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    if (!customerDetails.email.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    try {
+      await loadLencoScript();
+    } catch (error) {
+      toast.error("Failed to load payment popup. Please try again.");
+      return;
+    }
 
     const reference = `order_${Date.now()}`;
     const { firstName, lastName } = getFirstAndLastName(
@@ -94,28 +109,32 @@ export default function MenuPage() {
       onSuccess: async function (response: any) {
         const reference = response.reference;
 
-        console.log("reference::", reference);
-
-        const res = await fetch(`${API_URL}/api/orders/confirm`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            reference,
-            restaurantId: data.id,
-            items,
-            customer: {
-              name: customerDetails.fullName,
-              phone: customerDetails.phone,
-              email: customerDetails.email,
+        try {
+          const res = await fetch(`${API_URL}/api/orders/confirm`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-          }),
-        });
+            body: JSON.stringify({
+              reference,
+              restaurantId: data.id,
+              items,
+              customer: {
+                name: customerDetails.fullName.trim(),
+                phone: customerDetails.phone.trim(),
+                email: customerDetails.email.trim(),
+              },
+            }),
+          });
 
-        const result = await res.json();
+          const result = await res.json();
 
-        if (result.success) {
+          if (!res.ok || !result.success) {
+            throw new Error(result.message || "Order could not be confirmed");
+          }
+
+          toast.success("Order confirmed successfully");
+
           clearCart();
 
           navigate("/order-success", {
@@ -123,18 +142,22 @@ export default function MenuPage() {
               order: result.order,
             },
           });
-        } else {
-          alert("Order could not be confirmed ❌");
-          console.log(result);
+        } catch (error: any) {
+          toast.error(
+            error.message ||
+              "Payment was successful, but order confirmation failed",
+          );
+
+          console.log(error);
         }
       },
 
-      onClose: function () {
-        console.log("Payment closed");
+      onClose: () => {
+        toast.info("Payment popup closed");
       },
 
       onConfirmationPending: function () {
-        alert(
+        toast.info(
           "Payment confirmation is pending. Please complete authorization.",
         );
       },
