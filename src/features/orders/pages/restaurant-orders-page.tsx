@@ -66,10 +66,27 @@ export default function RestaurantOrdersPage() {
     }
   }
 
+  async function loadOrders() {
+    try {
+      const data = await getRestaurantOrders(restaurantId);
+      setOrders(data.orders);
+    } catch (error) {
+      toast.error("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    getRestaurantOrders(restaurantId)
-      .then((data) => setOrders(data.orders))
-      .finally(() => setLoading(false));
+    loadOrders();
+
+    const interval = window.setInterval(() => {
+      loadOrders();
+    }, 10000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
   }, []);
 
   if (loading) {
@@ -79,6 +96,9 @@ export default function RestaurantOrdersPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">Orders</h1>
+      <p className="text-xs text-muted-foreground">
+        Orders refresh automatically every 10 seconds.
+      </p>
 
       {orders.length === 0 && (
         <p className="text-muted-foreground">No orders yet.</p>
